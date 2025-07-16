@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n-key="appTitle">PerpPilot AI - 永续合约杠杆倍率AI分析助手 ｜ Perpetual Futures Leverage Ratio AI Analysis Assistant
+  </title>
+  <meta name="keywords"
+    content="PerpPilot, PerpPilot-AI, perpetual futures calculator, crypto leverage calculator, 永续合约计算器, 杠杆计算器, position size calculator, 仓位计算器, how to choose leverage, 如何选择杠杆, safe leverage, 安全杠杆, avoid liquidation, 避免爆仓, AI trading assistant, AI 交易助手, risk management, 风险管理, stop-loss, 止损, liquidation price, 强平价格, Gemini AI">
+  <meta name="description"
+    content="PerpPilot-AI is for new futures traders, calculating the safest leverage from their own trading plan to solve the dangerous problem of simply guessing what leverage to use." />
+  <meta name="description"
+    content="PerpPilot-AI 是一款风险优先的合约杠杆计算器。别再凭感觉猜杠杆！输入您的交易策略和风险偏好，即刻反向算出最安全的杠杆，有效避免爆仓。更有 AI 策略分析，让交易更智能。">
+  <meta name="author" content="Kane" />
+
+  <!-- Tailwind CSS for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #111827;
+      /* bg-gray-900 */
+      color: #d1d5db;
+      /* text-gray-300 */
+    }
+
+    /* Custom styles for the slider */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      /* bg-blue-500 */
+      cursor: pointer;
+      border-radius: 50%;
+      margin-top: -6px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #3b82f6;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .glowing-border {
+      border: 1px solid transparent;
+      transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .glowing-border-green {
+      border-color: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    .glowing-border-orange {
+      border-color: #f97316;
+      box-shadow: 0 0 10px #f97316;
+    }
+
+    .glowing-border-red {
+      border-color: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+    }
+
+    .icon-link:hover {
+      transform: scale(1.1);
+      color: #ffffff;
+    }
+
+    /* Hide/Show with transition */
+    .hidden-smooth {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      margin-top: 0;
+      transition: opacity 0.3s, max-height 0.3s, margin-top 0.3s, visibility 0s 0.3s;
+      overflow: hidden;
+    }
+
+    .visible-smooth {
+      opacity: 1;
+      visibility: visible;
+      max-height: 1000px;
+      /* Large enough for content */
+      transition: opacity 0.3s, max-height 0.5s, margin-top 0.3s;
+    }
+
+    #logic-warning.visible-smooth {
+      margin-top: 0.5rem;
+      /* mt-2 */
+    }
+
+    #ai-result-card.visible-smooth {
+      margin-top: 1rem;
+      /* mt-4 */
+    }
+
+    /* AI Card Gradient Border */
+    .ai-card {
+      background: #1f2937;
+      /* bg-gray-800 */
+      border: 1px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+
+    .ai-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1;
+      margin: -1px;
+      border-radius: inherit;
+      background: linear-gradient(to right, #3b82f6, #9333ea);
+    }
+
+    /* Simple spinner */
+    .spinner {
+      border: 2px solid #374151;
+      /* bg-gray-700 */
+      border-top: 2px solid #3b82f6;
+      /* bg-blue-500 */
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* UX FIX: Style for AI result text area */
+    #ai-result-text {
+      max-height: 250px;
+      /* Set a max height */
+      overflow-y: auto;
+      /* Add vertical scrollbar when content overflows */
+      padding-right: 8px;
+      /* Add some space for the scrollbar */
+    }
+
+    /* Custom scrollbar for AI result text area */
+    #ai-result-text::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #ai-result-text::-webkit-scrollbar-track {
+      background: #374151;
+      /* bg-gray-700 */
+      border-radius: 3px;
+    }
+
+    #ai-result-text::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      /* bg-gray-600 */
+      border-radius: 3px;
+    }
+
+    #ai-result-text::-webkit-scrollbar-thumb:hover {
+      background: #6b7280;
+      /* bg-gray-500 */
+    }
+
+  </style>
+</head>
+
+<body class="antialiased">
+  <!-- API Key Modal -->
+  <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md m-4">
+      <h3 class="text-xl font-semibold text-white mb-4" data-i18n-key="apiKeyModalTitle">配置您的 Gemini API Key</h3>
+      <p class="text-sm text-gray-400 mb-4" data-i18n-key="apiKeyModalDesc">提供您自己的 API Key 可以获得更稳定、无速率限制的体验。您的 Key
+        将仅保存在您的浏览器中。</p>
+      <div>
+        <label for="api-key-input" class="block text-sm font-medium text-gray-300 mb-1"
+          data-i18n-key="apiKeyModalInputLabel">Gemini API Key</label>
+        <input type="password" id="api-key-input" class="w-full bg-gray-700 border-gray-600 rounded-lg text-white p-2.5"
+          placeholder="AIzaSy...">
+      </div>
+      <div class="flex justify-end gap-4 mt-6">
+        <button id="close-api-modal-btn"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition"
+          data-i18n-key="apiKeyModalClose">关闭</button>
+        <button id="save-api-key-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition"
+          data-i18n-key="apiKeyModalSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Header with social links and language switcher -->
+    <div class="w-full max-w-6xl mx-auto flex justify-end items-center space-x-4 p-4">
+      <a href="https://x.com/szkane" target="_blank" class="text-gray-400 transition icon-link" title="X (Twitter)">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
+          </path>
+        </svg>
+      </a>
+      <a href="https://github.com/szkane" target="_blank" class="text-gray-400 transition icon-link" title="GitHub">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd"
+            d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"
+            clip-rule="evenodd"></path>
+        </svg>
+      </a>
+      <button id="lang-switcher" class="text-gray-400 transition icon-link" title="切换语言 / Switch Language">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z">
+          </path>
+        </svg>
+      </button>
+    </div>
+
+    <header class="text-center mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold text-white" data-i18n-key="mainTitle"> PerpPilot AI - 永续合约杠杆倍率AI分析助手
+      </h1>
+      <p class="text-gray-400 mt-2 max-w-2xl mx-auto" data-i18n-key="subtitle">一个风险优先的交易策略规划工具，帮助合约小白新手合理使用杠杆倍率。</p>
+    </header>
+
+    <!-- Disclaimer Banner -->
+    <div
+      class="w-full max-w-4xl mx-auto bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-4 py-3 rounded-lg text-center text-sm mb-8">
+      <p data-i18n-key="disclaimer">合约杠杆交易有风险，本工具仅作学习测试使用。 Buy me a coffee ➡️
+        0xEF87627054282666C00c23590c3684F7b80165ba
+      </p>
+    </div>
+
+    <main class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      <!-- Input Section -->
+      <section id="inputs" class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-4" data-i18n-key="inputTitle">
+          交易参数输入</h2>
+        <div class="space-y-6">
+          <!-- Trade Direction -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2" data-i18n-key="directionLabel">交易方向</label>
+            <div class="flex gap-4" id="tradeDirection">
+              <button id="btn-short" class="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold transition"
+                data-i18n-key="shortButton">做空 (Short)</button>
+              <button id="btn-long" class="flex-1 bg-gray-600 text-white py-2 rounded-lg font-semibold transition"
+                data-i18n-key="longButton">做多 (Long)</button>
+            </div>
+            <input type="hidden" id="direction" value="short">
+          </div>
+
+          <!-- Input Group Fields -->
+          <div class="space-y-6">
+            <div class="relative">
+              <label for="entryPrice" class="block text-sm font-medium text-gray-300 mb-1"
+                data-i18n-key="entryPriceLabel">开仓价格</label>
+              <input type="number" id="entryPrice" value="3.9"
+                class="block w-full bg-gray-700 border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white p-2.5 pr-14">
+              <span class="absolute inset-y-0 right-0 top-7 flex items-center pr-4 text-gray-400">USDT</span>
+            </div>
+            <div class="relative">
+              <label for="stopLossPrice" class="block text-sm font-medium text-gray-300 mb-1"
+                data-i18n-key="slPriceLabel">止损价格</label>
+              <input type="number" id="stopLossPrice" value="4.12"
+                class="block w-full bg-gray-700 border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white p-2.5 pr-14">
+              <span class="absolute inset-y-0 right-0 top-7 flex items-center pr-4 text-gray-400">USDT</span>
+            </div>
+            <div class="relative">
+              <label for="margin" class="block text-sm font-medium text-gray-300 mb-1"
+                data-i18n-key="marginLabel">投入本金</label>
+              <input type="number" id="margin" value="1"
+                class="block w-full bg-gray-700 border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white p-2.5 pr-14">
+              <span class="absolute inset-y-0 right-0 top-7 flex items-center pr-4 text-gray-400">USDT</span>
+            </div>
+          </div>
+
+          <!-- Risk Percentage -->
+          <div>
+            <label for="riskPercentage" class="block text-sm font-medium text-gray-300"
+              data-i18n-key="riskPercentLabel">可亏损比例 (<span id="riskPercentageValue">20</span>%)</label>
+            <input type="range" id="riskPercentage" min="1" max="100" value="20"
+              class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer mt-2">
+            <div class="flex justify-between text-xs text-gray-500 mt-1 px-1">
+              <span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span><span>100%</span>
+            </div>
+          </div>
+
+          <!-- Key Level (Dynamic Label) -->
+          <div class="relative">
+            <label for="keyLevel" id="keyLevelLabel" class="block text-sm font-medium text-gray-300 mb-1"
+              data-i18n-key="keyLevelLabelShort">关键阻力位</label>
+            <p class="text-xs text-gray-500 mb-1" data-i18n-key="keyLevelDesc">您的终极防线。用于评估在对手盘“插针”猎杀止损等极端行情下的生存能力。</p>
+            <input type="number" id="keyLevel" value="4.5"
+              class="block w-full bg-gray-700 border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white p-2.5 pr-14">
+            <span class="absolute inset-y-0 right-0 top-12 flex items-center pr-4 text-gray-400">USDT</span>
+          </div>
+          <!-- Logic Validation Warning -->
+          <div id="logic-warning"
+            class="hidden-smooth bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-3 py-2 rounded-md text-xs">
+          </div>
+
+          <!-- Take Profit Price (Optional) -->
+          <div class="relative">
+            <label for="takeProfitPrice" class="block text-sm font-medium text-gray-300 mb-1"
+              data-i18n-key="tpPriceLabel">止盈价格 (可选)</label>
+            <input type="number" id="takeProfitPrice" value="3.5"
+              class="block w-full bg-gray-700 border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-white p-2.5 pr-14">
+            <span class="absolute inset-y-0 right-0 top-7 flex items-center pr-4 text-gray-400">USDT</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Output Section -->
+      <section id="outputs" class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-4" data-i18n-key="outputTitle">
+          计算结果分析</h2>
+        <div class="space-y-6">
+          <!-- Recommended Leverage -->
+          <div class="text-center p-4 bg-gray-900 rounded-lg">
+            <p class="text-sm font-medium text-gray-400" data-i18n-key="leverageLabel">🥇 建议的最大杠杆</p>
+            <p id="leverage" class="text-5xl font-bold text-blue-400 mt-2">3.5x</p>
+          </div>
+
+          <!-- Strategy Health -->
+          <div id="healthAnalysis" class="p-4 rounded-lg glowing-border">
+            <p class="text-lg font-semibold text-white mb-2 flex items-center">
+              <span id="healthIcon" class="mr-2">✅</span>
+              <span id="healthTitle" data-i18n-key="healthTitleSafe">策略健康</span>
+            </p>
+            <p id="healthDescription" class="text-sm text-gray-300" data-i18n-key="healthDescSafe"
+              data-liquidation-price="4.98" data-key-level="4.5">您的预估强平价 (4.98) 远高于您分析的关键阻力位 (4.5)。此杠杆倍数下，您的策略有足够的安全空间。
+            </p>
+          </div>
+
+          <!-- AI Analysis Section -->
+          <div class="flex items-center space-x-2">
+            <button id="ai-analysis-btn"
+              class="flex-grow bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
+              <span class="font-bold text-lg">✨</span>
+              <span data-i18n-key="aiButton">AI 分析我的策略</span>
+              <span id="ai-spinner" class="spinner hidden"></span>
+            </button>
+            <button id="api-key-config-btn" class="p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
+              title="配置 API Key">
+              <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a4 4 0 100 8 4 4 0 000-8z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div id="ai-result-card" class="hidden-smooth ai-card p-4 rounded-lg">
+            <p class="text-sm font-semibold text-purple-300 mb-2" data-i18n-key="aiCardTitle">由 Gemini AI 生成的策略分析</p>
+            <div id="ai-result-text" class="text-sm text-gray-300 space-y-2"></div>
+          </div>
+
+
+          <!-- Detailed Results -->
+          <div class="grid grid-cols-2 gap-4 text-sm mt-4">
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="positionValueLabel">仓位价值 (USDT)</p>
+              <p id="positionValue" class="text-white font-semibold text-lg">3.55</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="positionSizeLabel">可开仓数量 (币)</p>
+              <p id="positionSize" class="text-white font-semibold text-lg">0.91</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="estLossLabel">预估亏损金额</p>
+              <p id="estimatedLoss" class="text-red-400 font-semibold text-lg">-0.20</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="estProfitLabel">预估盈利金额</p>
+              <p id="estimatedProfit" class="text-green-400 font-semibold text-lg">+0.36</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="rrRatioLabel">盈亏比</p>
+              <p id="rrRatio" class="text-white font-semibold text-lg">1.82</p>
+            </div>
+            <div class="bg-gray-700 p-3 rounded-lg">
+              <p class="text-gray-400" data-i18n-key="liqPriceLabel">预估强平价格 (USDT)</p>
+              <p id="liquidationPrice" class="text-orange-400 font-semibold text-lg">4.98</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- I18N (Internationalization) Setup ---
+      const translations = {
+        'en': {
+          appTitle: 'PerpPilot AI - Perpetual Futures Leverage Ratio AI Analysis Assistant',
+          mainTitle: 'PerpPilot AI - Perpetual Futures Leverage Ratio AI Analysis Assistant',
+          subtitle: 'A risk-first trading strategy planning tool to help crypto novices use leverage rationally.',
+          disclaimer: 'Perp trading is risky. This tool is for educational and testing purposes only. Buy me a coffee ➡️ 0xEF87627054282666C00c23590c3684F7b80165ba',
+          inputTitle: 'Trade Parameters',
+          outputTitle: 'Result Analysis',
+          directionLabel: 'Direction',
+          shortButton: 'Short',
+          longButton: 'Long',
+          entryPriceLabel: 'Entry Price',
+          slPriceLabel: 'Stop-Loss Price',
+          marginLabel: 'Margin',
+          riskPercentLabel: 'Max Loss Percentage',
+          keyLevelLabelShort: 'Key Resistance Level',
+          keyLevelLabelLong: 'Key Support Level',
+          keyLevelDesc: 'Your ultimate line of defense. Used to assess survivability in extreme "pin hunting" scenarios.',
+          tpPriceLabel: 'Take-Profit Price (Optional)',
+          logicWarningShort: '<strong>Logic Suggestion:</strong> The Key Resistance Level ({keyLevel}) should typically be higher than your Stop-Loss Price ({stopLossPrice}). Please check your strategic defense line.',
+          logicWarningLong: '<strong>Logic Suggestion:</strong> The Key Support Level ({keyLevel}) should typically be lower than your Stop-Loss Price ({stopLossPrice}). Please check your strategic defense line.',
+          aiButton: '✨ AI Analyze My Strategy',
+          aiButtonLoading: 'Analyzing...',
+          aiCardTitle: 'Strategy Analysis by Gemini AI',
+          apiKeyModalTitle: 'Configure Your Gemini API Key',
+          apiKeyModalDesc: 'Providing your own API Key allows for a more stable experience without rate limits. Your key is saved only in your browser.',
+          apiKeyModalInputLabel: 'Gemini API Key',
+          apiKeyModalClose: 'Close',
+          apiKeyModalSave: 'Save',
+          leverageLabel: '🥇 Recommended Max Leverage',
+          healthTitleSafe: 'Strategy Healthy',
+          healthTitleWarn: 'Strategy Warning',
+          healthTitleDanger: 'Strategy Dangerous',
+          healthDescSafe: 'Your est. liquidation price ({liquidationPrice}) is well beyond your key resistance level ({keyLevel}). Your strategy has enough safety room.',
+          healthDescSafeLong: 'Your est. liquidation price ({liquidationPrice}) is well below your key support level ({keyLevel}). Your strategy has enough safety room.',
+          healthDescWarn: 'Your est. liquidation price ({liquidationPrice}) is close to your key resistance level ({keyLevel}). Extreme wicks could invalidate your strategy.',
+          healthDescWarnLong: 'Your est. liquidation price ({liquidationPrice}) is close to your key support level ({keyLevel}). Extreme wicks could invalidate your strategy.',
+          healthDescDanger: 'Your est. liquidation price ({liquidationPrice}) is worse than your key resistance level ({keyLevel})! Your position might be liquidated before your analysis is tested. Strongly consider reducing leverage!',
+          healthDescDangerLong: 'Your est. liquidation price ({liquidationPrice}) is worse than your key support level ({keyLevel})! Your position might be liquidated before your analysis is tested. Strongly consider reducing leverage!',
+          healthDescDefault: 'Enter a key level to analyze your strategy\'s health under extreme market conditions.',
+          healthTitleDefault: 'Enter Key Level for Analysis',
+          positionValueLabel: 'Position Value (USDT)',
+          positionSizeLabel: 'Position Size (Coins)',
+          estLossLabel: 'Estimated Loss',
+          estProfitLabel: 'Estimated Profit',
+          rrRatioLabel: 'Risk/Reward Ratio',
+          liqPriceLabel: 'Est. Liquidation Price (USDT)',
+          errorInvalidInput: 'Please enter valid prices and margin.',
+          errorInvalidSL: 'Stop-loss price does not match trade direction.',
+          errorAIGeneric: 'AI analysis failed. Please check your API Key or try again later.'
+        },
+        'zh-CN': {
+          appTitle: 'PerpPilot AI - 永续合约杠杆倍率AI分析助手',
+          mainTitle: 'PerpPilot AI - 永续合约杠杆倍率AI分析助手',
+          subtitle: '一个风险优先的交易策略规划工具，帮助合约小白新手合理使用杠杆倍率。',
+          disclaimer: '合约杠杆交易有风险，本工具仅作学习测试使用。 Buy me a coffee ➡️ 0xEF87627054282666C00c23590c3684F7b80165ba',
+          inputTitle: '交易参数输入',
+          outputTitle: '计算结果分析',
+          directionLabel: '交易方向',
+          shortButton: '做空 (Short)',
+          longButton: '做多 (Long)',
+          entryPriceLabel: '开仓价格',
+          slPriceLabel: '止损价格',
+          marginLabel: '投入本金',
+          riskPercentLabel: '可亏损比例',
+          keyLevelLabelShort: '关键阻力位',
+          keyLevelLabelLong: '关键支撑位',
+          keyLevelDesc: '您的终极防线。用于评估在对手盘“插针”猎杀止损等极端行情下的生存能力。',
+          tpPriceLabel: '止盈价格 (可选)',
+          logicWarningShort: '<strong>逻辑建议：</strong>关键阻力位 ({keyLevel}) 通常应高于您的止损价格 ({stopLossPrice})。请检查您的战略防线是否设置正确。',
+          logicWarningLong: '<strong>逻辑建议：</strong>关键支撑位 ({keyLevel}) 通常应低于您的止损价格 ({stopLossPrice})。请检查您的战略防线是否设置正确。',
+          aiButton: '✨ AI 分析我的策略',
+          aiButtonLoading: '分析中...',
+          aiCardTitle: '由 Gemini AI 生成的策略分析',
+          apiKeyModalTitle: '配置您的 Gemini API Key',
+          apiKeyModalDesc: '提供您自己的 API Key 可以获得更稳定、无速率限制的体验。您的 Key 将仅保存在您的浏览器中。',
+          apiKeyModalInputLabel: 'Gemini API Key',
+          apiKeyModalClose: '关闭',
+          apiKeyModalSave: '保存',
+          leverageLabel: '🥇 建议的最大杠杆',
+          healthTitleSafe: '策略健康',
+          healthTitleWarn: '值得关注',
+          healthTitleDanger: '策略危险',
+          healthDescSafe: '您的预估强平价 ({liquidationPrice}) 远高于您分析的关键阻力位 ({keyLevel})。此杠杆倍数下，您的策略有足够的安全空间。',
+          healthDescSafeLong: '您的预估强平价 ({liquidationPrice}) 远低于您分析的关键支撑位 ({keyLevel})。此杠杆倍数下，您的策略有足够的安全空间。',
+          healthDescWarn: '您的预估强平价 ({liquidationPrice}) 已接近您分析的关键阻力位 ({keyLevel})。极端插针行情可能导致策略失效。',
+          healthDescWarnLong: '您的预估强平价 ({liquidationPrice}) 已接近您分析的关键支撑位 ({keyLevel})。极端插针行情可能导致策略失效。',
+          healthDescDanger: '您的预估强平价 ({liquidationPrice}) 已差于您分析的关键阻力位 ({keyLevel})！仓位可能在考验您的分析前就被清算。强烈建议降低杠杆或增加保证金！',
+          healthDescDangerLong: '您的预估强平价 ({liquidationPrice}) 已差于您分析的关键支撑位 ({keyLevel})！仓位可能在考验您的分析前就被清算。强烈建议降低杠杆或增加保证金！',
+          healthDescDefault: '输入您分析的终极防线，以评估策略在极端行情下的健康度。',
+          healthTitleDefault: '请输入关键位以分析',
+          positionValueLabel: '仓位价值 (USDT)',
+          positionSizeLabel: '可开仓数量 (币)',
+          estLossLabel: '预估亏损金额',
+          estProfitLabel: '预估盈利金额',
+          rrRatioLabel: '盈亏比',
+          liqPriceLabel: '预估强平价格 (USDT)',
+          errorInvalidInput: '请输入有效的价格和本金。',
+          errorInvalidSL: '止损价格设置不符合交易方向。',
+          errorAIGeneric: 'AI 分析失败，请检查您的 API Key或稍后再试。'
+        }
+      };
+
+      let currentLang = 'zh-CN';
+      let lastCalculationResult = {};
+
+      const setLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        localStorage.setItem('calculator_lang', lang);
+        document.querySelectorAll('[data-i18n-key]').forEach(el => {
+          const key = el.getAttribute('data-i18n-key');
+          let text = translations[lang][key] || translations['en'][key] || '';
+
+          if (key.startsWith('healthDesc')) {
+            const liqPrice = el.getAttribute('data-liquidation-price') || 'N/A';
+            const keyLvl = el.getAttribute('data-key-level') || 'N/A';
+            text = text.replace('{liquidationPrice}', liqPrice).replace('{keyLevel}', keyLvl);
+          }
+
+          if (el.id === 'ai-analysis-btn' && el.disabled) {
+            el.querySelector('span:not(.spinner)').textContent = translations[lang]['aiButtonLoading'];
+            return;
+          }
+
+          el.textContent = text;
+        });
+        calculate();
+      };
+
+      document.getElementById('lang-switcher').addEventListener('click', () => {
+        const newLang = currentLang === 'en' ? 'zh-CN' : 'en';
+        setLanguage(newLang);
+      });
+
+      const initLang = () => {
+        const savedLang = localStorage.getItem('calculator_lang');
+        const browserLang = navigator.language.startsWith('zh') ? 'zh-CN' : 'en';
+        setLanguage(savedLang || browserLang);
+      };
+
+
+      // --- DOM Element References ---
+      const inputs = {
+        direction: document.getElementById('direction'),
+        btnShort: document.getElementById('btn-short'),
+        btnLong: document.getElementById('btn-long'),
+        entryPrice: document.getElementById('entryPrice'),
+        stopLossPrice: document.getElementById('stopLossPrice'),
+        margin: document.getElementById('margin'),
+        riskPercentage: document.getElementById('riskPercentage'),
+        riskPercentageValue: document.getElementById('riskPercentageValue'),
+        keyLevel: document.getElementById('keyLevel'),
+        keyLevelLabel: document.getElementById('keyLevelLabel'),
+        takeProfitPrice: document.getElementById('takeProfitPrice'),
+        logicWarning: document.getElementById('logic-warning'),
+        aiAnalysisBtn: document.getElementById('ai-analysis-btn'),
+        aiSpinner: document.getElementById('ai-spinner'),
+        apiKeyConfigBtn: document.getElementById('api-key-config-btn'),
+        apiKeyModal: document.getElementById('api-key-modal'),
+        apiKeyInput: document.getElementById('api-key-input'),
+        saveApiKeyBtn: document.getElementById('save-api-key-btn'),
+        closeApiModalBtn: document.getElementById('close-api-modal-btn'),
+      };
+
+      const outputs = {
+        leverage: document.getElementById('leverage'),
+        healthAnalysis: document.getElementById('healthAnalysis'),
+        healthIcon: document.getElementById('healthIcon'),
+        healthTitle: document.getElementById('healthTitle'),
+        healthDescription: document.getElementById('healthDescription'),
+        positionValue: document.getElementById('positionValue'),
+        positionSize: document.getElementById('positionSize'),
+        estimatedLoss: document.getElementById('estimatedLoss'),
+        estimatedProfit: document.getElementById('estimatedProfit'),
+        rrRatio: document.getElementById('rrRatio'),
+        liquidationPrice: document.getElementById('liquidationPrice'),
+        aiResultCard: document.getElementById('ai-result-card'),
+        aiResultText: document.getElementById('ai-result-text'),
+      };
+
+      const MAINTENANCE_MARGIN_RATE = 0.005;
+
+      // --- Event Listeners ---
+      Object.values(inputs).forEach(input => {
+        if (input.tagName === 'INPUT') {
+          input.addEventListener('input', calculate);
+        }
+      });
+
+      inputs.btnShort.addEventListener('click', () => setDirection('short'));
+      inputs.btnLong.addEventListener('click', () => setDirection('long'));
+      inputs.aiAnalysisBtn.addEventListener('click', handleAiAnalysis);
+      inputs.apiKeyConfigBtn.addEventListener('click', () => {
+        inputs.apiKeyInput.value = localStorage.getItem('user_gemini_api_key') || '';
+        inputs.apiKeyModal.classList.remove('hidden');
+      });
+      inputs.closeApiModalBtn.addEventListener('click', () => inputs.apiKeyModal.classList.add('hidden'));
+      inputs.saveApiKeyBtn.addEventListener('click', () => {
+        const key = inputs.apiKeyInput.value.trim();
+        if (key) {
+          localStorage.setItem('user_gemini_api_key', key);
+        } else {
+          localStorage.removeItem('user_gemini_api_key');
+        }
+        inputs.apiKeyModal.classList.add('hidden');
+      });
+
+
+      function setDirection(dir) {
+        inputs.direction.value = dir;
+        if (dir === 'short') {
+          inputs.btnShort.classList.remove('bg-gray-600');
+          inputs.btnShort.classList.add('bg-red-500');
+          inputs.btnLong.classList.remove('bg-green-500');
+          inputs.btnLong.classList.add('bg-gray-600');
+          inputs.keyLevelLabel.setAttribute('data-i18n-key', 'keyLevelLabelShort');
+        } else {
+          inputs.btnLong.classList.remove('bg-gray-600');
+          inputs.btnLong.classList.add('bg-green-500');
+          inputs.btnShort.classList.remove('bg-red-500');
+          inputs.btnShort.classList.add('bg-gray-600');
+          inputs.keyLevelLabel.setAttribute('data-i18n-key', 'keyLevelLabelLong');
+        }
+        inputs.keyLevelLabel.textContent = translations[currentLang][inputs.keyLevelLabel.getAttribute('data-i18n-key')];
+        calculate();
+      }
+
+      // --- Logic Validation Function ---
+      function validateInputLogic() {
+        const direction = inputs.direction.value;
+        const stopLossPrice = parseFloat(inputs.stopLossPrice.value) || 0;
+        const keyLevel = parseFloat(inputs.keyLevel.value) || 0;
+
+        if (stopLossPrice <= 0 || keyLevel <= 0) {
+          inputs.logicWarning.classList.remove('visible-smooth');
+          inputs.logicWarning.classList.add('hidden-smooth');
+          return;
+        }
+
+        let warningKey = null;
+        if (direction === 'short' && stopLossPrice > keyLevel) {
+          warningKey = 'logicWarningShort';
+        } else if (direction === 'long' && stopLossPrice < keyLevel) {
+          warningKey = 'logicWarningLong';
+        }
+
+        if (warningKey) {
+          let text = translations[currentLang][warningKey] || '';
+          text = text.replace('{keyLevel}', keyLevel).replace('{stopLossPrice}', stopLossPrice);
+          inputs.logicWarning.innerHTML = text;
+          inputs.logicWarning.classList.remove('hidden-smooth');
+          inputs.logicWarning.classList.add('visible-smooth');
+        } else {
+          inputs.logicWarning.classList.remove('visible-smooth');
+          inputs.logicWarning.classList.add('hidden-smooth');
+        }
+      }
+
+      // --- Main Calculation Logic ---
+      function calculate() {
+        validateInputLogic();
+
+        const direction = inputs.direction.value;
+        const entryPrice = parseFloat(inputs.entryPrice.value) || 0;
+        const stopLossPrice = parseFloat(inputs.stopLossPrice.value) || 0;
+        const margin = parseFloat(inputs.margin.value) || 0;
+        const riskPercentage = parseFloat(inputs.riskPercentage.value) || 0;
+        const keyLevel = parseFloat(inputs.keyLevel.value) || 0;
+        const takeProfitPrice = parseFloat(inputs.takeProfitPrice.value) || 0;
+
+        inputs.riskPercentageValue.textContent = riskPercentage;
+
+        if (entryPrice <= 0 || stopLossPrice <= 0 || margin <= 0) {
+          updateUI({ error: 'errorInvalidInput' });
+          return;
+        }
+        if ((direction === 'short' && stopLossPrice <= entryPrice) || (direction === 'long' && stopLossPrice >= entryPrice)) {
+          updateUI({ error: 'errorInvalidSL' });
+          return;
+        }
+
+        const maxLossAmount = margin * (riskPercentage / 100);
+        const stopLossPriceDistance = Math.abs(entryPrice - stopLossPrice);
+
+        const positionSizeInCoins = stopLossPriceDistance > 0 ? maxLossAmount / stopLossPriceDistance : 0;
+        const positionValue = positionSizeInCoins * entryPrice;
+
+        const recommendedLeverage = margin > 0 ? positionValue / margin : 0;
+
+        let liquidationPrice = 0;
+        if (recommendedLeverage > 0) {
+          if (direction === 'short') {
+            liquidationPrice = entryPrice * (1 + (1 / recommendedLeverage) - MAINTENANCE_MARGIN_RATE);
+          } else {
+            liquidationPrice = entryPrice * (1 - (1 / recommendedLeverage) + MAINTENANCE_MARGIN_RATE);
+          }
+        }
+
+        let estimatedProfit = 0;
+        let rrRatio = 0;
+        if (takeProfitPrice > 0 && ((direction === 'short' && takeProfitPrice < entryPrice) || (direction === 'long' && takeProfitPrice > entryPrice))) {
+          const profitDistance = Math.abs(takeProfitPrice - entryPrice);
+          if (stopLossPriceDistance > 0) {
+            rrRatio = profitDistance / stopLossPriceDistance;
+            estimatedProfit = profitDistance * positionSizeInCoins;
+          }
+        }
+
+        lastCalculationResult = {
+          leverage: recommendedLeverage,
+          positionValue: positionValue,
+          positionSize: positionSizeInCoins,
+          estimatedLoss: -maxLossAmount,
+          estimatedProfit: estimatedProfit,
+          liquidationPrice: liquidationPrice,
+          rrRatio: rrRatio,
+          direction: direction,
+          keyLevel: keyLevel,
+          entryPrice, stopLossPrice, takeProfitPrice, margin, riskPercentage
+        };
+
+        updateUI(lastCalculationResult);
+      }
+
+      // --- UI Update Function ---
+      function updateUI(results) {
+        outputs.healthAnalysis.classList.remove('glowing-border-red', 'glowing-border-green', 'glowing-border-orange');
+
+        if (results.error) {
+          outputs.leverage.textContent = 'N/A';
+          outputs.healthTitle.textContent = translations[currentLang][results.error];
+          outputs.healthDescription.textContent = '';
+          outputs.healthIcon.textContent = '❗';
+          outputs.healthAnalysis.classList.add('glowing-border-red');
+          return;
+        }
+
+        outputs.leverage.textContent = isFinite(results.leverage) ? `${results.leverage.toFixed(1)}x` : 'N/A';
+        outputs.positionValue.textContent = isFinite(results.positionValue) ? results.positionValue.toFixed(2) : 'N/A';
+        outputs.positionSize.textContent = isFinite(results.positionSize) ? results.positionSize.toFixed(4) : 'N/A';
+        outputs.estimatedLoss.textContent = isFinite(results.estimatedLoss) ? results.estimatedLoss.toFixed(2) : 'N/A';
+        outputs.estimatedProfit.textContent = results.estimatedProfit > 0 ? `+${results.estimatedProfit.toFixed(2)}` : 'N/A';
+        outputs.liquidationPrice.textContent = isFinite(results.liquidationPrice) ? results.liquidationPrice.toFixed(4) : 'N/A';
+        outputs.rrRatio.textContent = results.rrRatio > 0 ? `1 : ${results.rrRatio.toFixed(2)}` : 'N/A';
+
+        if (results.keyLevel > 0 && isFinite(results.liquidationPrice)) {
+          updateHealthAnalysis(results.liquidationPrice, results.keyLevel, results.direction);
+        } else {
+          outputs.healthAnalysis.className = 'p-4 rounded-lg glowing-border';
+          outputs.healthIcon.textContent = 'ℹ️';
+          outputs.healthTitle.setAttribute('data-i18n-key', 'healthTitleDefault');
+          outputs.healthDescription.setAttribute('data-i18n-key', 'healthDescDefault');
+          outputs.healthTitle.textContent = translations[currentLang]['healthTitleDefault'];
+          outputs.healthDescription.textContent = translations[currentLang]['healthDescDefault'];
+        }
+      }
+
+      function updateHealthAnalysis(liquidationPrice, keyLevel, direction) {
+        let healthState = '';
+        const buffer = 0.05;
+
+        if (direction === 'short') {
+          if (liquidationPrice > keyLevel * (1 + buffer)) healthState = 'safe';
+          else if (liquidationPrice > keyLevel) healthState = 'warn';
+          else healthState = 'danger';
+        } else {
+          if (liquidationPrice < keyLevel * (1 - buffer) && liquidationPrice > 0) healthState = 'safe';
+          else if (liquidationPrice < keyLevel && liquidationPrice > 0) healthState = 'warn';
+          else healthState = 'danger';
+        }
+
+        outputs.healthAnalysis.className = 'p-4 rounded-lg glowing-border';
+        let titleKey, descKey;
+
+        switch (healthState) {
+          case 'safe':
+            outputs.healthAnalysis.classList.add('glowing-border-green');
+            outputs.healthIcon.textContent = '✅';
+            titleKey = 'healthTitleSafe';
+            descKey = direction === 'short' ? 'healthDescSafe' : 'healthDescSafeLong';
+            break;
+          case 'warn':
+            outputs.healthAnalysis.classList.add('glowing-border-orange');
+            outputs.healthIcon.textContent = '⚠️';
+            titleKey = 'healthTitleWarn';
+            descKey = direction === 'short' ? 'healthDescWarn' : 'healthDescWarnLong';
+            break;
+          case 'danger':
+            outputs.healthAnalysis.classList.add('glowing-border-red');
+            outputs.healthIcon.textContent = '❌';
+            titleKey = 'healthTitleDanger';
+            descKey = direction === 'short' ? 'healthDescDanger' : 'healthDescDangerLong';
+            break;
+        }
+
+        outputs.healthTitle.setAttribute('data-i18n-key', titleKey);
+        outputs.healthDescription.setAttribute('data-i18n-key', descKey);
+        outputs.healthDescription.setAttribute('data-liquidation-price', liquidationPrice.toFixed(2));
+        outputs.healthDescription.setAttribute('data-key-level', keyLevel);
+
+        outputs.healthTitle.textContent = translations[currentLang][titleKey];
+        let descText = translations[currentLang][descKey] || '';
+        outputs.healthDescription.textContent = descText.replace('{liquidationPrice}', liquidationPrice.toFixed(2)).replace('{keyLevel}', keyLevel);
+      }
+
+      // --- Gemini AI Analysis ---
+      async function handleAiAnalysis() {
+        const btn = inputs.aiAnalysisBtn;
+        const spinner = inputs.aiSpinner;
+        const btnText = btn.querySelector('span:not(.spinner)');
+
+        // Set loading state
+        btn.disabled = true;
+        btnText.textContent = translations[currentLang]['aiButtonLoading'];
+        spinner.classList.remove('hidden');
+        outputs.aiResultCard.classList.add('visible-smooth');
+        outputs.aiResultText.innerHTML = `<div class="flex justify-center items-center p-4"><div class="spinner"></div></div>`;
+
+        const { direction, entryPrice, stopLossPrice, takeProfitPrice, margin, riskPercentage, leverage, rrRatio, keyLevel } = lastCalculationResult;
+
+        const langPrompt = currentLang === 'zh-CN'
+          ? '请用简体中文回答。'
+          : 'Please answer in English.';
+
+        const prompt = `
+You are a neutral crypto trading analyst assistant. A user is planning a trade. Do not give financial advice. Analyze the provided parameters from an educational perspective, pointing out the relationships between the numbers. ${langPrompt}
+
+Here are the parameters:
+- Trading Direction: ${direction}
+- Entry Price: ${entryPrice.toFixed(4)} USDT
+- Stop-Loss Price: ${stopLossPrice.toFixed(4)} USDT
+- Take-Profit Price: ${takeProfitPrice > 0 ? takeProfitPrice.toFixed(4) + ' USDT' : 'Not set'}
+- Margin: ${margin.toFixed(2)} USDT
+- Max Loss Percentage of Margin: ${riskPercentage}%
+- Calculated Leverage: ${leverage.toFixed(1)}x
+- Key Resistance/Support Level: ${keyLevel > 0 ? keyLevel.toFixed(4) + ' USDT' : 'Not set'}
+- Calculated Risk/Reward Ratio: ${rrRatio > 0 ? '1 : ' + rrRatio.toFixed(2) : 'N/A'}
+
+Based on these numbers, provide a brief, educational analysis in markdown format covering:
+1.  **盈亏比分析 (Risk/Reward Profile):** 简要评价计算出的R/R比率。如果未设置止盈，则说明其影响。
+2.  **止损策略分析 (Stop-Loss Strategy):** 评价止损价格与开仓价格的距离（百分比），并说明这是激进型还是保守型策略。
+3.  **杠杆与风险评估 (Leverage & Risk Assessment):** 结合止损距离，评价当前计算出的杠杆倍率。解释为什么这个杠杆是根据用户的风险偏好计算出来的。
+`;
+
+        try {
+          const userApiKey = localStorage.getItem('user_gemini_api_key');
+          const apiKey = userApiKey || ""; // Use user's key if available, otherwise use environment's
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+          const payload = {
+            contents: [{
+              role: "user",
+              parts: [{ text: prompt }]
+            }]
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.candidates && result.candidates.length > 0) {
+            const text = result.candidates[0].content.parts[0].text;
+            // Basic markdown to HTML conversion
+            let html = text
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\n/g, '<br>');
+            outputs.aiResultText.innerHTML = html;
+          } else {
+            throw new Error("No content received from AI.");
+          }
+
+        } catch (error) {
+          console.error("AI Analysis Error:", error);
+          outputs.aiResultText.textContent = translations[currentLang]['errorAIGeneric'];
+        } finally {
+          // Reset button state
+          btn.disabled = false;
+          btn.querySelector('span:not(.spinner)').textContent = translations[currentLang]['aiButton'];
+          spinner.classList.add('hidden');
+        }
+      }
+
+
+      // --- Initial Load ---
+      initLang();
+    });
+  </script>
+</body>
+
+</html>
