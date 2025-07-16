@@ -4,7 +4,7 @@
   </a>
 </h1>
 
-<p align="center"> <a href="https://perppilot.iamkane.com/"> Online Demo </a> ｜<a href="./docs/prd-cn.md">PRD(中文) </a> ｜ <a href="./docs/prd.md">PRD(English) </a> |  <a href="https://github.com/szkane/PerpPilot-A/issues">Feedback</a><br></p>
+<p align="center"> <a href="https://perppilot.iamkane.com/"> Online Demo </a> ｜<a href="./docs/prd-cn.md">PRD(中文) </a> ｜ <a href="./docs/prd.md">PRD(English) </a> |  <a href="https://github.com/szkane/PerpPilot-AI/issues">Feedback</a><br></p>
 
 <div align="center">
   
