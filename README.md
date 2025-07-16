@@ -8,7 +8,7 @@
 
 <div align="center">
   
- ![GitHub License](https://img.shields.io/github/license/szkane/PerpPilot-AI) | <a href="https://x.com/intent/follow?screen_name=szkane" target="_blank"> ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/szkane) </a> ｜<a href="docs/sponsor.md" target="_blank"> ![Sponsor](https://img.shields.io/badge/Sponsor-FF6699.svg?logo=githubsponsors&logoColor=white) </a>
+ ![GitHub License](https://img.shields.io/github/license/szkane/PerpPilot-AI) | <a href="https://x.com/intent/follow?screen_name=szkane" target="_blank"> ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/szkane)</a> ｜<a href="docs/sponsor.md" target="_blank">![Sponsor](https://img.shields.io/badge/Sponsor-FF6699.svg?logo=githubsponsors&logoColor=white)</a>
 </div>
 
 # PerpPilot AI
@@ -120,3 +120,5 @@ PerpPilot-AI then instantly does the math for you, calculating the maximum safe 
 - 💰 在这笔交易中，你真正愿意承担风险的确切金额。
 
 然后，PerpPilot-AI 会立即为你完成计算，找出你的专属计划所能承受的最大安全杠杆。它赋予你力量，让你能够运用自己好不容易得来的市场知识，做出理性的、风险优先的决策，给你精心设计的策略留出它应有的、用以成功的喘息空间。✨
+
+![](asset/banner.png)
