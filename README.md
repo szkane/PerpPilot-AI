@@ -4,11 +4,11 @@
   </a>
 </h1>
 
-<p align="center"> | <a href="https://perppilot.iamkane.com/"> Online Demo </a> ｜<a href="./docs/README.zh.md">PRD(中文) </a> ｜ <a href="./docs/README.en.md">PRD(English) </a> |  <a href="https://github.com/szkane/PerpPilot-A/issues">Feedback</a><br></p>
+<p align="center"> <a href="https://perppilot.iamkane.com/"> Online Demo </a> ｜<a href="./docs/prd-cn.md">PRD(中文) </a> ｜ <a href="./docs/prd.md">PRD(English) </a> |  <a href="https://github.com/szkane/PerpPilot-A/issues">Feedback</a><br></p>
 
 <div align="center">
   
-![GitHub Repo stars](https://img.shields.io/github/stars/szkane/PerpPilot-AI) | ![GitHub License](https://img.shields.io/github/license/szkane/PerpPilot-AI) | ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/szkane) 
+ ![GitHub License](https://img.shields.io/github/license/szkane/PerpPilot-AI) | <a href="https://x.com/intent/follow?screen_name=szkane" target="_blank"> ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/szkane) </a> ｜<a href="docs/sponsor.md" target="_blank"> ![Sponsor](https://img.shields.io/badge/Sponsor-FF6699.svg?logo=githubsponsors&logoColor=white) </a>
 </div>
 
 # PerpPilot AI
