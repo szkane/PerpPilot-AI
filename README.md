@@ -8,10 +8,7 @@
 
 <div align="center">
   
-[![][license-shield]][license-link]
-[![][commercial-shield]][commercial-link]
-[![][sponsor-shield]][sponsor-link]
-
+![GitHub Repo stars](https://img.shields.io/github/stars/szkane/PerpPilot-AI) | ![GitHub License](https://img.shields.io/github/license/szkane/PerpPilot-AI) | ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/szkane) 
 </div>
 
 # PerpPilot AI
